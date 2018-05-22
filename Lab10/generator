@@ -1,0 +1,81 @@
+#ifndef generatorH
+#define generatorH
+
+//klasa odpowiedzialna za generowanie sekwencji wybranego typu, na podstawie wzoru przedstawionego w _fun_ptr
+template <typename T> class generator
+{
+public:
+	//konstruktor przyjmuje jako argumenty wartość początkową i funkcję określającą sposób w jaki ciąg będzie się zmieniał
+	generator(T value_to_set, T(*fun_ptr_to_set)(T));
+	
+	//przeładowany operator ++ zmieniający wartość _value przechowujący wartość aktualnego wyrazu ciągu za pomocą aktualnie przyjętej funkcji i zwracający referencję na generator w celu dalszej modyfikacji
+	generator & operator++();
+	//operator porównujący aktualny wyraz ciągu (_value) z value_to_compare przy pomocy operatora matematycznego >
+	bool operator > (const T & value_to_compare);
+	//operator porównujący aktualny wyraz ciągu (_value) z value_to_compare przy pomocy operatora matematycznego <
+	bool operator < (const T & value_to_compare);
+
+	//funkcja zwracająca referencję na aktualny wyraz ciągu(pozwala to również na jego modyfikację)
+	T& current();
+	//zwraca wartość następnego wyrazu ciągu i zmienia wartość zmiennej _value zgodnie z operacjami przyjętymi w funkcji wskazywanej przez _fun_ptr
+	T next();
+	//zmienia aktualną wartość i wartość początkową oraz aktualny wskaźnik funkcyjny określający rodzaj wykonywanej operacji
+	void reset(T value_to_set, T(*fun_ptr_to_set)(T));
+	//przywraca początkową wartość ciągu (_value = _begin_value)
+	void reset();
+private:
+	//przechowuje wartość ustawioną w konstruktorze lub przez funkcję void reset(T, T(*fun_ptr_to_set)(T))
+	T _begin_value;
+	//przechowuje wartość aktualnego wyrazu ciągu
+	T _value;
+	//przechowuhje wskaźnik funkcyjny określający operacje wykonywane na ciągu
+	T (*_fun_ptr)(T);
+};
+
+template <typename T> generator<T>::generator(T value_to_set, T(*fun_ptr_to_set)(T)): _begin_value(value_to_set), _value(value_to_set), _fun_ptr(fun_ptr_to_set)
+{
+
+}
+
+template <typename T> generator<T> & generator<T>::operator++()
+{
+	_value = _fun_ptr(_value);
+
+	return *this;
+}
+
+template <typename T> T& generator<T>::current()
+{
+	return _value;
+}
+
+template <typename T> T generator<T>::next()
+{
+	_value = _fun_ptr(_value);
+
+	return _value;
+}
+
+template <typename T> bool generator<T>::operator > (const T & value_to_compare)
+{
+	return _value > value_to_compare ? true : false; 
+}
+
+template <typename T> bool generator<T>::operator < (const T & value_to_compare)
+{
+	return _value < value_to_compare ? true : false; 
+}
+
+template <typename T> void generator<T>::reset(T value_to_set, T(*fun_ptr_to_set)(T))
+{
+	_begin_value = value_to_set;
+	_value = value_to_set;
+	_fun_ptr = fun_ptr_to_set;
+}
+
+template <typename T> void generator<T>::reset()
+{
+	_value = _begin_value;
+}
+
+#endif
